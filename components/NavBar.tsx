@@ -1,8 +1,8 @@
 export const NavBar = () => {
   return (
     <div className={'bg-green-500 h-20 flex flex-row drop-shadow-xl'}>
-      <div className="logo w-1/8 grid items-center justify-items-center p-6">
-        <p className={'text-white text-xl font-extrabold drop-shadow-lg'}>Recepten app</p>
+      <div className="logo w-1/8 grid items-center justify-items-center m-6">
+        <p className={'text-white text-xl font-extrabold drop-shadow-lg'}>Recipe app</p>
       </div>
       <div className="flex grow justify-center">
         <div className="search-bar w-2/6 grid items-center">
