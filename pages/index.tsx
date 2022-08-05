@@ -8,7 +8,12 @@ import {RecipeDto} from '../domain/RecipeDto';
 export async function getStaticProps() {
   try {
     const {data, errors} = await client.query({
-      query: gql`query QueryRecipes{recipes{name, cookingTime, totalPersons}}`,
+      query: gql`query QueryRecipes{recipes{
+          id,
+          name,
+          cookingTime,
+          totalPersons
+      }}`,
     });
     return {
       props: {
@@ -28,13 +33,13 @@ export async function getStaticProps() {
 const Home: NextPage = ({recipes}) => {
 
   return (
-    <div className={'bg-green-100'}>
+    <>
       <div
         className={'grid auto-rows-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-5 2xl:grid-cols-5 xl:grid-cols-4  justify-items-center'}>
         {recipes.map((recipe: RecipeDto, index: number) => (
           <RecipeBox key={index} recipe={recipe}/>))}
       </div>
-    </div>
+    </>
   );
 };
 
