@@ -6,24 +6,33 @@ import {RecipeDto} from '../domain/RecipeDto';
 
 
 export async function getStaticProps() {
-  const { data } = await client.query({
-    query: gql`query QueryRecipes{recipes{name, cookingTime, totalPersons}}`,
-  });
-
-  return {
-    props: {
-      recipes: data.recipes
-    },
-  };
+  try {
+    const {data, errors} = await client.query({
+      query: gql`query QueryRecipes{recipes{name, cookingTime, totalPersons}}`,
+    });
+    return {
+      props: {
+        recipes: data.recipes,
+      },
+    };
+  } catch (e: any) {
+    console.error(`Error message: ${e.message}`);
+    return {
+      props: {
+        recipes: [],
+      },
+    };
+  }
 }
 
 const Home: NextPage = ({recipes}) => {
 
   return (
-    <div className={'h-screen bg-green-100'}>
-      <div className={'h-screen grid auto-rows-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-5 2xl:grid-cols-5 xl:grid-cols-4  justify-items-center'}>
-      {recipes.map((recipe: RecipeDto, index: number) => (
-        <RecipeBox key={index} recipe={recipe}/>))}
+    <div className={'bg-green-100'}>
+      <div
+        className={'grid auto-rows-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-5 2xl:grid-cols-5 xl:grid-cols-4  justify-items-center'}>
+        {recipes.map((recipe: RecipeDto, index: number) => (
+          <RecipeBox key={index} recipe={recipe}/>))}
       </div>
     </div>
   );
