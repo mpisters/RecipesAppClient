@@ -1,40 +1,37 @@
 import {NextPage} from 'next';
-import {client} from '../../apollo-client';
-import {gql} from '@apollo/client';
+import {gql, useLazyQuery, useQuery} from '@apollo/client';
 import {mapUnitOfMeasurement} from '../../domain/UnitOfMeasurement';
+import {useRouter} from 'next/router';
+import {useEffect} from 'react';
 
-export async function getServerSideProps(context: { params: { recipeId: any; }; }) {
-  const recipeId = context.params.recipeId;
-  try {
-    const {data, errors} = await client.query({
-      query: gql`query QueryRecipes{recipeById(id: 1) {
-          name,
-          ingredients{
-              amount
-              product {
-                  name
-              },
-              unitOfMeasurement
-          }
-      }}`,
-    });
-    return {
-      props: {
-        recipeById: data.recipeById,
-      },
-    };
-  } catch (e: any) {
-    console.error(`Error message: ${e.message}`);
-    return {
-      props: {
-        recipeById: undefined,
-      },
-    };
+const GET_RECIPEBYID = gql`query QueryRecipes($id: Int!){recipeById(id: $id) {
+    name,
+    ingredients{
+        amount
+        product {
+            name
+        },
+        unitOfMeasurement
+    }
+}}`;
+
+export const RecipePage: NextPage = () => {
+  const router = useRouter();
+
+  const [getRecipeById, {loading, error, data: recipeById}] = useLazyQuery(GET_RECIPEBYID)
+  useEffect(() => {
+    if(router.query.recipeId){
+      getRecipeById({variables: {id: router.query.recipeId}})
+    }
+  }, [getRecipeById, router.query])
+
+  if (loading || !recipeById){
+    return (<div><p>Loading....</p></div>)
   }
-}
-
-export const RecipePage: NextPage = ({recipeById}) => {
-  console.log(JSON.stringify(recipeById));
+  if (error){
+    return (<div><p>Something went wrong...</p></div>)
+  }
+  console.log("RECIPE", JSON.stringify(recipeById))
   return (
     <div className={'flex justify-center'}>
       <div className={'mt-10 h-screen drop-shadow-lg w-3/4 bg-white rounded'}>
@@ -46,10 +43,11 @@ export const RecipePage: NextPage = ({recipeById}) => {
           <div className={'ingredients'}>
             {recipeById.ingredients && recipeById.ingredients.map((ingredient, index) => {
               return (
-                <div  key={index} className={'flex flex-row m-4 text-gray-500'}>
+                <div key={index} className={'flex flex-row m-4 text-gray-500'}>
                   <input className={'mr-10'} type="checkbox"/>
                   <p className={'mr-2'}>{ingredient.amount}</p>
-                  <p className={'mr-2'}>{mapUnitOfMeasurement(ingredient.unitOfMeasurement)}</p>
+                  <p
+                    className={'mr-2'}>{mapUnitOfMeasurement(ingredient.unitOfMeasurement)}</p>
                   <p>{ingredient.product.name.toLowerCase()}</p>
                 </div>
               );
