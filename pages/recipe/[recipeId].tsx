@@ -1,8 +1,6 @@
 import {NextPage} from 'next';
-import {gql, useLazyQuery, useQuery} from '@apollo/client';
+import {gql, useQuery} from '@apollo/client';
 import {mapUnitOfMeasurement} from '../../domain/UnitOfMeasurement';
-import {useRouter} from 'next/router';
-import {useEffect} from 'react';
 
 const GET_RECIPEBYID = gql`query QueryRecipes($id: Int!){recipeById(id: $id) {
     name,
@@ -15,23 +13,24 @@ const GET_RECIPEBYID = gql`query QueryRecipes($id: Int!){recipeById(id: $id) {
     }
 }}`;
 
-export const RecipePage: NextPage = () => {
-  const router = useRouter();
+export async function getServerSideProps(context) {
+  return {
+    props: {params: context.params}
+  };
+}
 
-  const [getRecipeById, {loading, error, data: recipeById}] = useLazyQuery(GET_RECIPEBYID)
-  useEffect(() => {
-    if(router.query.recipeId){
-      getRecipeById({variables: {id: router.query.recipeId}})
-    }
-  }, [getRecipeById, router.query])
+export const RecipePage: NextPage = (context) => {
+  console.log(context)
+  const {loading, error, data: recipeById} = useQuery(GET_RECIPEBYID, {variables: {id: context.params.recipeId}})
+  console.log('RecipePage', recipeById);
 
-  if (loading || !recipeById){
-    return (<div><p>Loading....</p></div>)
+  if (loading || !recipeById) {
+    return (<div><p>Loading....</p></div>);
   }
-  if (error){
-    return (<div><p>Something went wrong...</p></div>)
+  if (error) {
+    return (<div><p>Something went wrong...</p></div>);
   }
-  console.log("RECIPE", JSON.stringify(recipeById))
+  console.log('RECIPE', JSON.stringify(recipeById));
   return (
     <div className={'flex justify-center'}>
       <div className={'mt-10 h-screen drop-shadow-lg w-3/4 bg-white rounded'}>
