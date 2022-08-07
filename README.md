@@ -2,6 +2,7 @@
 This recipe app is created with:
 
 * nextjs
+* typescript
 * apollo client
 * graphql
 * tailwindcss
