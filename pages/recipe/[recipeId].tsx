@@ -1,6 +1,8 @@
 import {NextPage} from 'next';
-import {gql, useQuery} from '@apollo/client';
+import {gql, useLazyQuery, useQuery} from '@apollo/client';
 import {mapUnitOfMeasurement} from '../../domain/UnitOfMeasurement';
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/router';
 
 const GET_RECIPEBYID = gql`query QueryRecipes($id: Int!){recipeById(id: $id) {
     name,
@@ -15,14 +17,37 @@ const GET_RECIPEBYID = gql`query QueryRecipes($id: Int!){recipeById(id: $id) {
 
 export async function getServerSideProps(context) {
   return {
-    props: {params: context.params}
+    props: {params: context.params},
   };
 }
 
 export const RecipePage: NextPage = (context) => {
-  console.log(context)
-  const {loading, error, data: recipeById} = useQuery(GET_RECIPEBYID, {variables: {id: context.params.recipeId}})
-  console.log('RecipePage', recipeById);
+  console.log('context', context);
+  // const [loading, setLoading] = useState<boolean>(false);
+  // const [error, setError] = useState<Error | undefined>();
+  // const [recipeById, setRecipeById] = useState();
+  console.log(parseInt(context.params.recipeId, 10))
+  const {
+    loading,
+    error,
+    data: recipeById,
+  } = useQuery(GET_RECIPEBYID, {variables: {id: parseInt(context.params.recipeId, 10)}});
+  console.log(loading, error, recipeById);
+  // useEffect(() => {
+  //   console.log('useeffect', context);
+  //   if (!context.params || !context.params.recipeId) {
+  //     return;
+  //   }
+  //   getRecipeById({variables: {id: parseInt(context.params.recipeId, 10)}})
+  //     .then((result) => {
+  //       console.log("result::::::", result)
+  //       const {loading, error, data} = result;
+  //       setLoading(loading);
+  //       setError(error);
+  //       setRecipeById(data);
+  //     })
+  //     .catch((error) => console.log(error));
+  // }, []);
 
   if (loading || !recipeById) {
     return (<div><p>Loading....</p></div>);
@@ -30,7 +55,6 @@ export const RecipePage: NextPage = (context) => {
   if (error) {
     return (<div><p>Something went wrong...</p></div>);
   }
-  console.log('RECIPE', JSON.stringify(recipeById));
   return (
     <div className={'flex justify-center'}>
       <div className={'mt-10 h-screen drop-shadow-lg w-3/4 bg-white rounded'}>
